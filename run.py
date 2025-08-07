@@ -11,7 +11,7 @@ db = SQLAlchemy(app)
 
 
 class Email(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Text, primary_key=True)
     category = db.Column(db.String(20), nullable=False)
     subject = db.Column(db.String(100), nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
