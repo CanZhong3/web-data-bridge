@@ -1,0 +1,1025 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "custom",
+              "cronExpression": "* /5 * * * *"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -800,
+        352
+      ],
+      "id": "9b682524-ec2e-47fe-8f4b-4032302a5462",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2bvf051VnfcPJGrc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "=Subject: {{ $json.Subject }}\nEmail Body: {{ $json.snippet }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Promotion",
+              "description": "This is any email looking to sell me things"
+            },
+            {
+              "category": "Social",
+              "description": "Any email from a social media site like YouTube"
+            },
+            {
+              "category": "Personal",
+              "description": "Any email sent from member in my contacts"
+            },
+            {
+              "category": "Misc",
+              "description": "Anything that doesn't fall within other categories"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        -528,
+        320
+      ],
+      "id": "a1bae997-fb8d-4f91-b24d-1eb061882209",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -672,
+        592
+      ],
+      "id": "76ec7735-3611-46fc-b71c-4e6abdf0bdf1",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "sZ8smK3MyyWzBWK1",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "CATEGORY_PROMOTIONS"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5abc67db-8813-45ba-92c2-4c83d514a2ca",
+      "name": "Add label to message",
+      "webhookId": "4d51ed26-f19d-417a-b585-7f3d7e97adcc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2bvf051VnfcPJGrc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "CATEGORY_SOCIAL"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        176
+      ],
+      "id": "4b395330-9e57-4c5c-ab26-38f2fb8e1e7d",
+      "name": "Add label to message2",
+      "webhookId": "4d51ed26-f19d-417a-b585-7f3d7e97adcc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2bvf051VnfcPJGrc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "CATEGORY_PERSONAL"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        368
+      ],
+      "id": "4ea2965f-265f-4608-81ef-664219a361e8",
+      "name": "Add label to message3",
+      "webhookId": "4d51ed26-f19d-417a-b585-7f3d7e97adcc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2bvf051VnfcPJGrc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        336,
+        -160
+      ],
+      "id": "7c0842ac-f59c-4aac-8ec0-d469e7c9d710",
+      "name": "Mark a message as read",
+      "webhookId": "b2e66283-1e94-400b-9927-0f8c4ee815db",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2bvf051VnfcPJGrc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.message.content.subject_line }}",
+        "message": "={{ $json.message.content.email_body }}",
+        "options": {
+          "threadId": "={{ $('Gmail Trigger').item.json.threadId }}",
+          "sendTo": "={{ $('Gmail Trigger').item.json.From }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        704,
+        368
+      ],
+      "id": "4ec9195e-9e59-4809-981b-7925ad3b6a96",
+      "name": "Create a draft",
+      "webhookId": "3f3f0bf6-563f-4bbc-991d-64dd348b2c38",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2bvf051VnfcPJGrc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "Label_8763826067558738211"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        48,
+        640
+      ],
+      "id": "be07a3cf-19d3-4892-99de-00df595880e8",
+      "name": "Add label to message4",
+      "webhookId": "4d51ed26-f19d-417a-b585-7f3d7e97adcc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2bvf051VnfcPJGrc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You should summarize emails.",
+              "role": "system"
+            },
+            {
+              "content": "=Subject:{{ $('Gmail Trigger').item.json.Subject }}\nEmail Body: {{ $('Gmail Trigger').item.json.snippet }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        304,
+        0
+      ],
+      "id": "85fa961a-77f2-41db-8bf2-7be747f59a4f",
+      "name": "Message a model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "sZ8smK3MyyWzBWK1",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You should summarize emails.",
+              "role": "system"
+            },
+            {
+              "content": "=Subject:{{ $('Gmail Trigger').item.json.Subject }}\nEmail Body: {{ $('Gmail Trigger').item.json.snippet }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        208,
+        176
+      ],
+      "id": "a3eb64b7-a4aa-4bf6-90de-8fbf99d1acbf",
+      "name": "Message a model4",
+      "credentials": {
+        "openAiApi": {
+          "id": "sZ8smK3MyyWzBWK1",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You should summarize emails.",
+              "role": "system"
+            },
+            {
+              "content": "=Subject:{{ $('Gmail Trigger').item.json.Subject }}\nEmail Body: {{ $('Gmail Trigger').item.json.snippet }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        272,
+        496
+      ],
+      "id": "abaa37bd-51de-47f0-9222-8bb691d2c426",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "sZ8smK3MyyWzBWK1",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You should summarize emails.",
+              "role": "system"
+            },
+            {
+              "content": "=Subject:{{ $('Gmail Trigger').item.json.Subject }}\nEmail Body: {{ $('Gmail Trigger').item.json.snippet }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        272,
+        736
+      ],
+      "id": "a56180cb-0944-476e-be9e-3da909ff870e",
+      "name": "Message a model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "sZ8smK3MyyWzBWK1",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "email",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Gmail Trigger').item.json.id }}",
+            "to": "={{ $('Text Classifier').item.json.To }}",
+            "from_": "={{ $('Text Classifier').item.json.From }}",
+            "snippet": "={{ $json.message.content }}",
+            "date_posted": "={{ $now }}",
+            "subject": "={{ $('Gmail Trigger').item.json.Subject }}",
+            "category": "={{ $('Text Classifier').item.json.labels[1].id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "date_posted",
+              "displayName": "date_posted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "snippet",
+              "displayName": "snippet",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "from_",
+              "displayName": "from_",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "to",
+              "displayName": "to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        704,
+        0
+      ],
+      "id": "e0bbd771-0872-4413-b59d-cb15712978d6",
+      "name": "Insert or update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "0YHQvO4Zr6hD2hqF",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "email",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Gmail Trigger').item.json.id }}",
+            "to": "={{ $('Text Classifier').item.json.To }}",
+            "from_": "={{ $('Text Classifier').item.json.From }}",
+            "snippet": "={{ $json.message.content }}",
+            "date_posted": "={{ $now }}",
+            "subject": "={{ $('Gmail Trigger').item.json.Subject }}",
+            "category": "={{ $('Text Classifier').item.json.labels[1].id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "date_posted",
+              "displayName": "date_posted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "snippet",
+              "displayName": "snippet",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "from_",
+              "displayName": "from_",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "to",
+              "displayName": "to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        704,
+        176
+      ],
+      "id": "22996dc4-9c56-480d-854f-29f27f9d3e1d",
+      "name": "Insert or update rows in a table4",
+      "credentials": {
+        "postgres": {
+          "id": "0YHQvO4Zr6hD2hqF",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "email",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Gmail Trigger').item.json.id }}",
+            "to": "={{ $('Text Classifier').item.json.To }}",
+            "from_": "={{ $('Text Classifier').item.json.From }}",
+            "snippet": "={{ $json.message.content }}",
+            "date_posted": "={{ $now }}",
+            "subject": "={{ $('Gmail Trigger').item.json.Subject }}",
+            "category": "={{ $('Text Classifier').item.json.labels[1].id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "date_posted",
+              "displayName": "date_posted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "snippet",
+              "displayName": "snippet",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "from_",
+              "displayName": "from_",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "to",
+              "displayName": "to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        832,
+        496
+      ],
+      "id": "e750b79f-de07-4e63-91b1-b1e34626f940",
+      "name": "Insert or update rows in a table5",
+      "credentials": {
+        "postgres": {
+          "id": "0YHQvO4Zr6hD2hqF",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "email",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Gmail Trigger').item.json.id }}",
+            "to": "={{ $('Text Classifier').item.json.To }}",
+            "from_": "={{ $('Text Classifier').item.json.From }}",
+            "snippet": "={{ $json.message.content }}",
+            "date_posted": "={{ $now }}",
+            "subject": "={{ $('Gmail Trigger').item.json.Subject }}",
+            "category": "={{ $('Text Classifier').item.json.labels[1].id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "date_posted",
+              "displayName": "date_posted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "snippet",
+              "displayName": "snippet",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "from_",
+              "displayName": "from_",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "to",
+              "displayName": "to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        752,
+        736
+      ],
+      "id": "5ef46539-9471-4703-b498-cb743e2030a7",
+      "name": "Insert or update rows in a table6",
+      "credentials": {
+        "postgres": {
+          "id": "0YHQvO4Zr6hD2hqF",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Add label to message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add label to message2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add label to message3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add label to message4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label to message": {
+      "main": [
+        [
+          {
+            "node": "Mark a message as read",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Message a model2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label to message2": {
+      "main": [
+        [
+          {
+            "node": "Message a model4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label to message3": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark a message as read": {
+      "main": [
+        []
+      ]
+    },
+    "Add label to message4": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model2": {
+      "main": [
+        [
+          {
+            "node": "Insert or update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model4": {
+      "main": [
+        [
+          {
+            "node": "Insert or update rows in a table4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Insert or update rows in a table5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Insert or update rows in a table6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "133e4d63-0511-49ba-a4a1-ebc8c0bb1237",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2f4d7bbcd64744ac88f5fed5ca9c3266666737300407f6d913ff8c0ec73c9973"
+  },
+  "id": "YBrze6wOHZTMFoIt",
+  "tags": []
+}
